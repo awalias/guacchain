@@ -7,7 +7,7 @@ All comments and ideas for improvements and pull requests are welcomed. We want 
 
 ## License
 
-GNU General Public License v3.0
+WTFPL.
 
 Copyright (c) 2018 Guacchain Foundation.
 
