@@ -1,6 +1,16 @@
 ## Guacchain
 (open)sourcing great avocados
 
+## Requirements
+
+You need to following to be able to run the test cases:
+
+```
+Node ≥ 7.6  confirm with node -v
+npm ≥ 4     confirm with npm -v 
+```
+
+
 ## Contributions
 
 All comments and ideas for improvements and pull requests are welcomed. We want to improve the project based on feedback from the community.
