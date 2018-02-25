@@ -27,22 +27,22 @@ contract('AvoCrowdsale', function(accounts) {
 	assert.isAtLeast(accs.length, 3);
     });
 
-    beforeEach("should deploy a new crowdsale", function() {
-	return AvoCrowdsale.new(
-	    start, end,
-	    rate,                          // rate (units per wei)
-	    web3.toWei(1, "ether"),        // crowdsale goal
-	    web3.toWei(125000, "ether"),   // crowdsale cap
-	    owner,                         // fund collection wallet $$$
-	    { from: owner }
-	).then(async instance => {
-	    crowdsale = instance;
-	    token = AvoToken.at(await crowdsale.token.call());
+    describe("Crowdsale", function() {
+	beforeEach("should deploy a new crowdsale", function() {
+	    return AvoCrowdsale.new(
+		start, end,
+		rate,                          // rate (units per wei)
+		web3.toWei(1, "ether"),        // crowdsale goal
+		web3.toWei(125000, "ether"),   // crowdsale cap
+		owner,                         // fund collection wallet $$$
+		{ from: owner }
+	    ).then(async instance => {
+		crowdsale = instance;
+		token = AvoToken.at(await crowdsale.token.call());
+	    });
 	});
-    });
 
-    describe("standard interaction", function() {
-	it("Avotoken should create", function() {
+	it("should create AvoToken", function() {
 	    return AvoToken.new();
 	});
 	
@@ -80,9 +80,40 @@ contract('AvoCrowdsale', function(accounts) {
 	    assert.strictEqual(balance1.toString(), web3.toWei(0.23*rate, "ether").toString());
 	    assert.strictEqual(balance2.toString(), web3.toWei(1.23*rate, "ether").toString());
 	    assert.equal(goalReached, true);
-	});
-
-	
+	});	
     });
 
+    describe("Investors", function() {
+	beforeEach("should deploy a new crowdsale", async function() {
+	    crowdsale = await AvoCrowdsale.new(
+		start, start+2,
+		rate,                          // rate (units per wei)
+		web3.toWei(1, "ether"),        // crowdsale goal
+		web3.toWei(125000, "ether"),   // crowdsale cap
+		owner,                         // fund collection wallet $$$
+		{ from: owner }
+	    )
+
+	    token = AvoToken.at(await crowdsale.token.call());
+
+	    await crowdsale.buyTokens(
+		investor1,
+		{from: investor1, value: web3.toWei(0.23, "ether")}
+	    );
+	    await crowdsale.buyTokens(
+		investor2,
+		{from: investor2, value: web3.toWei(1.23, "ether")}
+	    );
+	});
+	
+	it("should be able to move funds", async function() {
+	    await token.transfer(investor2, web3.toWei(0.23*rate, "ether"), {from: investor1});
+
+	    let balance1 = await token.balanceOf.call(investor1);
+	    let balance2 = await token.balanceOf.call(investor2);
+
+	    assert.strictEqual(balance1.toNumber(), 0);
+	    assert.strictEqual(balance2.toString(), web3.toWei(1.46*rate, "ether").toString());	    
+	});	
+    });
 });
