@@ -1,5 +1,6 @@
 var Migrations = artifacts.require("./Migrations.sol");
 var AvoCrowdsale = artifacts.require("./AvoCrowdsale.sol");
+var AvoToken = artifacts.require("./AvoToken.sol");
 
 // TODO
 //  - Better use toWei
@@ -23,18 +24,21 @@ Y8b d88P
 `);
 
   let d = new Date();
-  let start = d.getTime()+10;
-  let end = d.getTime()+300;
+  let start = d.getTime();
+  let end = new Date(2020, 1, 1).getTime();
   
   console.log("Start is", start, "\nEnd is  ", end, "\n");
 
   const userAddress = accounts[0];
-  deployer.deploy(
-    AvoCrowdsale,
-    start, end,                    // start and end time
-    10,                            // rate (units per wei)
-    web3.toWei(1, "ether"),        // crowdsale goal
-    web3.toWei(125000, "ether"),   // crowdsale cap
-    userAddress                    // fund collection wallet $$$
-  );
+
+  deployer.deploy(AvoToken).then(function() {
+    return deployer.deploy(
+      AvoCrowdsale,
+      start, end,                    // start and end time
+      100,                            // rate (units per wei)
+      web3.toWei(1, "ether"),        // crowdsale goal
+      web3.toWei(125000, "ether"),   // crowdsale cap
+      userAddress,
+      AvoToken.address);
+  });
 }

@@ -28,17 +28,18 @@ contract('AvoCrowdsale', function(accounts) {
     });
 
     describe("Crowdsale", function() {
-	beforeEach("should deploy a new crowdsale", function() {
-	    return AvoCrowdsale.new(
+	beforeEach("should deploy a new crowdsale", async function() {
+		token = await AvoToken.new({ from: owner });
+	    await AvoCrowdsale.new(
 		start, end,
 		rate,                          // rate (units per wei)
 		web3.toWei(1, "ether"),        // crowdsale goal
 		web3.toWei(125000, "ether"),   // crowdsale cap
 		owner,                         // fund collection wallet $$$
+		token.address,                 // deployed token contract addr
 		{ from: owner }
 	    ).then(async instance => {
 		crowdsale = instance;
-		token = AvoToken.at(await crowdsale.token.call());
 	    });
 	});
 
@@ -46,7 +47,7 @@ contract('AvoCrowdsale', function(accounts) {
 	    return AvoToken.new();
 	});
 	
-        it("should process token purchase of Investor1", async function() {	    
+    it("should process token purchase of Investor1", async function() {  
 	    await crowdsale.buyTokens(
 		investor1,
 		{from: investor1, value: web3.toWei(0.23, "ether")}
@@ -61,7 +62,7 @@ contract('AvoCrowdsale', function(accounts) {
 	    assert.equal(goalReached, false);
 	});
 	
-        it("should process token purchase of Investor1 and Investor2", async function() {	    
+    it("should process token purchase of Investor1 and Investor2", async function() {	    
 	    await crowdsale.buyTokens(
 		investor1,
 		{from: investor1, value: web3.toWei(0.23, "ether")}
@@ -85,16 +86,18 @@ contract('AvoCrowdsale', function(accounts) {
 
     describe("Investors", function() {
 	beforeEach("should deploy a new crowdsale", async function() {
+		token = await AvoToken.new({ from: owner });
 	    crowdsale = await AvoCrowdsale.new(
 		start, start+2,
 		rate,                          // rate (units per wei)
 		web3.toWei(1, "ether"),        // crowdsale goal
 		web3.toWei(125000, "ether"),   // crowdsale cap
 		owner,                         // fund collection wallet $$$
+		token.address,                 // deployed contract address
 		{ from: owner }
 	    )
 
-	    token = AvoToken.at(await crowdsale.token.call());
+	    
 
 	    await crowdsale.buyTokens(
 		investor1,
